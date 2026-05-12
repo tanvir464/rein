@@ -1,0 +1,127 @@
+/* REIN design tokens — sourced from specs/design-references.md.
+ * Single source of truth; consumed by app/globals.css via @theme inline. */
+
+:root {
+  /* fonts */
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* gray ramp */
+  --gray-100: hsla(0, 0%, 95%, 1);
+  --gray-200: hsla(0, 0%, 92%, 1);
+  --gray-300: hsla(0, 0%, 90%, 1);
+  --gray-400: hsla(0, 0%, 86%, 1);
+  --gray-500: hsla(0, 0%, 79%, 1);
+  --gray-600: hsla(0, 0%, 66%, 1);
+  --gray-700: hsla(0, 0%, 56%, 1);
+  --gray-800: hsla(0, 0%, 49%, 1);
+  --gray-900: hsla(0, 0%, 30%, 1);
+  --gray-1000: hsla(0, 0%, 9%, 1);
+
+  /* accent — teal (locks at logo step) */
+  --accent-100: hsla(169, 70%, 96%, 1);
+  --accent-300: hsla(168, 70%, 90%, 1);
+  --accent-500: hsla(170, 70%, 72%, 1);
+  --accent-700: hsla(173, 80%, 36%, 1);
+  --accent-900: hsla(174, 91%, 25%, 1);
+  --accent-1000: hsla(171, 80%, 13%, 1);
+
+  /* soft surfaces / on-color text — semantic aliases that dark mode flips. */
+  --accent-soft-bg: var(--accent-100);
+  --accent-soft-fg: var(--accent-900);
+
+  /* semantic */
+  --success: hsla(131, 41%, 46%, 1);
+  --danger: hsla(358, 75%, 59%, 1);
+  --warning: hsla(39, 100%, 57%, 1);
+
+  /* badge tones — bg is a translucent tint; fg is the readable color. */
+  --tone-success-bg: hsla(131, 41%, 46%, 0.12);
+  --tone-success-fg: var(--success);
+  --tone-warning-bg: hsla(39, 100%, 57%, 0.15);
+  --tone-warning-fg: hsla(20, 79%, 30%, 1);
+  --tone-danger-bg: hsla(358, 75%, 59%, 0.12);
+  --tone-danger-fg: var(--danger);
+  --tone-muted-bg: var(--gray-100);
+  --tone-muted-fg: var(--gray-800);
+
+  /* surfaces */
+  --bg: hsla(0, 0%, 100%, 1);
+  --bg-elevated: hsla(0, 0%, 98%, 1);
+  --fg: hsla(0, 0%, 9%, 1);
+  --muted: hsla(0, 0%, 30%, 1);
+  --border: hsla(0, 0%, 86%, 1);
+
+  /* motion */
+  --ease-snap: ease;
+  --ease-glide: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.39, 0.18, 0.17, 0.99);
+  --dur-instant: 0.09s;
+  --dur-fast: 0.15s;
+  --dur-base: 0.2s;
+  --dur-slow: 0.3s;
+
+  /* radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* layout */
+  --container: 1080px;
+  --prose: 720px;
+  --header-height: 64px;
+  --sidebar-width: 240px;
+}
+
+[data-theme='dark'] {
+  --bg: hsla(0, 0%, 6%, 1);
+  --bg-elevated: hsla(0, 0%, 9%, 1);
+  --fg: hsla(0, 0%, 98%, 1);
+  --muted: hsla(0, 0%, 66%, 1);
+  --border: hsla(0, 0%, 18%, 1);
+
+  --gray-100: hsla(0, 0%, 13%, 1);
+  --gray-200: hsla(0, 0%, 16%, 1);
+  --gray-300: hsla(0, 0%, 20%, 1);
+  --gray-400: hsla(0, 0%, 25%, 1);
+  --gray-500: hsla(0, 0%, 32%, 1);
+  --gray-600: hsla(0, 0%, 45%, 1);
+  --gray-700: hsla(0, 0%, 56%, 1);
+  --gray-800: hsla(0, 0%, 70%, 1);
+  --gray-900: hsla(0, 0%, 86%, 1);
+  --gray-1000: hsla(0, 0%, 98%, 1);
+
+  /* Accent ramp — keep --accent-700 (brand) constant, but flip the soft/strong
+   * ends so a "100" surface becomes a deep teal tint and "900" text becomes
+   * a bright teal that reads on dark surfaces. */
+  --accent-100: hsla(173, 60%, 12%, 1);
+  --accent-300: hsla(173, 50%, 18%, 1);
+  --accent-500: hsla(172, 60%, 40%, 1);
+  --accent-900: hsla(170, 75%, 70%, 1);
+  --accent-1000: hsla(169, 80%, 88%, 1);
+
+  --accent-soft-bg: var(--accent-100);
+  --accent-soft-fg: var(--accent-900);
+
+  /* Tone overrides: tints stay translucent so they tone down on dark bg, but
+   * the warning fg has to lighten — dark orange on dark surface is unreadable. */
+  --tone-success-bg: hsla(131, 60%, 50%, 0.18);
+  --tone-success-fg: hsla(131, 50%, 70%, 1);
+  --tone-warning-bg: hsla(39, 100%, 57%, 0.18);
+  --tone-warning-fg: hsla(39, 100%, 75%, 1);
+  --tone-danger-bg: hsla(358, 75%, 59%, 0.20);
+  --tone-danger-fg: hsla(358, 90%, 75%, 1);
+  --tone-muted-bg: var(--gray-200);
+  --tone-muted-fg: var(--gray-800);
+}

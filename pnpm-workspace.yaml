@@ -1,0 +1,13 @@
+packages:
+  - 'apps/web'
+  - 'apps/docs'
+  - 'apps/mobile'
+  - 'packages/mcp'
+  - 'packages/sdk-ts'
+  - 'packages/langchain'
+  - 'packages/openai'
+  - 'packages/ai'
+  - 'packages/cli'
+  - 'service'
+  - 'services/sidecar'
+  - 'tests/cross-runtime'

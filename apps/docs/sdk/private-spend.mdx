@@ -1,0 +1,99 @@
+---
+title: 'Private spend (REIN × Umbra)'
+description: 'Owner-private agent spend via Arcium-powered shielded UTXOs. On-chain policy stays public and verifiable; execution rides Umbra.'
+---
+
+REIN's private-spend path keeps everything that matters off the public ledger
+— amounts, recipients, and tx graph — while keeping policy enforcement on-chain
+and verifiable. It is shipped 2026-05 on devnet via the
+[Umbra](https://umbra.cash) shielded-UTXO pool (powered by
+[Arcium](https://arcium.com)).
+
+## What it changes
+
+| Surface              | Public path                   | Private path (Umbra)                            |
+| -------------------- | ----------------------------- | ----------------------------------------------- |
+| Policy PDA           | Public, enforced on-chain     | **Unchanged** — same Policy PDA, same rules     |
+| Spend tx             | Visible amount + recipient    | Commitment only — no amount, no recipient       |
+| Receipt              | `SpendReceipt` PDA, public    | Encrypted blob, decrypts in browser only        |
+| Auditor disclosure   | Read the chain                | Owner shares a scoped view key                  |
+
+## Enabling private spend
+
+In the dashboard, open the vault detail and flip the **Private spend** toggle.
+The toggle persists on the policy and gates the SDK path; agents do not need
+any code changes.
+
+```bash
+# Or via the CLI
+rein vault set --private on
+```
+
+## View-key derivation
+
+The **view key** is owner-derived, browser-only, and never crosses the
+network. We derive it from a one-time signed message via the wallet adapter:
+
+```ts
+import { deriveViewKey } from '@rein/sdk/private';
+
+const sig = await wallet.signMessage(
+  new TextEncoder().encode(`rein-view-key:v1:${vault}`)
+);
+const viewKey = await deriveViewKey(sig); // HKDF-SHA256 → 32 bytes
+```
+
+The signature is consumed locally and discarded. The resulting `viewKey` is
+held in memory (and optionally cached in IndexedDB behind a passkey unlock).
+It is the only material capable of decrypting confidential receipts.
+
+<Warning>
+The owner key never moves. The view key is derived once, in the browser, and
+stays in the browser. The sidecar never sees either.
+</Warning>
+
+## Decrypt flow
+
+1. The dashboard fetches encrypted receipt blobs from the REIN service.
+2. The browser pulls the `viewKey` from memory.
+3. `decryptReceipt(blob, viewKey)` runs locally and yields `{ amount, recipient, memo, ts }`.
+4. The decrypted receipt is rendered in the activity feed; nothing decrypted is sent back.
+
+```ts
+import { decryptReceipt } from '@rein/sdk/private';
+
+const decrypted = await decryptReceipt(blob, viewKey);
+// { amount: 12.50, mint: 'USDC', recipient: 'Phantom…', ts: 1715000000 }
+```
+
+## Sidecar API contract
+
+The Umbra UTXO builder runs as an isolated sidecar (Fly.io) — REIN's main
+service does not hold private spend keys.
+
+| Endpoint                              | Verb | Purpose                                       |
+| ------------------------------------- | ---- | --------------------------------------------- |
+| `POST /utxo/create`                   | POST | Build + sign a private spend UTXO             |
+| `POST /utxo/spend`                    | POST | Consume a UTXO and emit encrypted receipt     |
+| `GET  /receipts/:vault?cursor=...`    | GET  | Paginated encrypted receipt blobs             |
+
+The sidecar key signs only the shielded-UTXO creation — never policy edits,
+never disputes, never refunds. Those continue to require the owner key.
+
+## Environment
+
+```bash
+# REIN service → sidecar
+REIN_SIDECAR_URL=https://rein-sidecar.fly.dev
+REIN_SIDECAR_AUTH=<bearer>
+
+# Sidecar (Fly.io)
+UMBRA_PROGRAM=<umbra program id>
+UMBRA_OPERATOR_KEY=<base58>  # sidecar key, isolated
+```
+
+## What's next
+
+- **Anonymous-mode UTXO** (Umbra stealth addresses) — Q3 2026.
+- **Compliance grants UI** — scoped auditor disclosure via shareable view-key
+  grants — Q3 2026.

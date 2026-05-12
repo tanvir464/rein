@@ -1,0 +1,93 @@
+---
+title: 'Insights (REIN × GoldRush)'
+description: 'USD-denominated treasury observability with anomaly detection and recipient reputation grading. Powered by GoldRush (Covalent).'
+---
+
+REIN's insights surface is the dashboard your CFO actually checks. Every
+receipt is enriched with USD price at time-of-spend, every allowlist entry
+is graded before approval, and outlier spend lights up the panel. Shipped
+2026-05 on devnet, powered by [GoldRush](https://goldrush.dev) data across
+100+ chains.
+
+## What's USD-enriched
+
+| Field            | Source                       | Notes                                       |
+| ---------------- | ---------------------------- | ------------------------------------------- |
+| `receipt.usd`    | GoldRush historical price    | Snapshot at receipt block-time              |
+| `vault.usdTotal` | Sum of `receipt.usd`         | Rolled up daily + 30-day window             |
+| `vault.wow`      | Last 7d vs. prior 7d         | Signed percentage; `null` if no prior data  |
+| `recipient.grade`| GoldRush 30d activity        | `known` / `new` / `flagged`                 |
+
+USD enrichment runs on the service. The dashboard reads the rolled-up
+values; no client-side price calls.
+
+## Cache & TTLs
+
+REIN caches at the edge to stay under quota and keep p95 < 200ms:
+
+- **Historical prices** — 24h TTL, keyed by `(mint, day)`.
+- **Recipient grading** — 24h TTL, keyed by `recipient`.
+- **WoW + sparkline** — 5min TTL, keyed by `vault`.
+- **Live insights page** — `s-maxage=60`, stale-while-revalidate.
+
+A cache miss falls back to GoldRush directly. A second miss within the same
+window degrades gracefully (see below).
+
+## Anomaly definitions
+
+Anomalies are surfaced in the insights panel as soon as a new receipt lands.
+
+| Flag               | Rule                                                          |
+| ------------------ | ------------------------------------------------------------- |
+| `outlier_amount`   | `usd > mean(last 30d) + 2σ`                                   |
+| `new_recipient`    | First spend to a recipient not seen in 90d of vault history   |
+| `velocity_spike`   | `count(24h) > 3× rolling 7d average`                          |
+| `unknown_grade`    | Recipient is `flagged` by GoldRush coverage                   |
+
+Each flag becomes a row in the activity feed with a tap-to-explain panel.
+
+## Failure mode (GoldRush quota)
+
+When the GoldRush quota is exhausted or the upstream is slow:
+
+1. The service returns the **last cached USD figure** with a `stale: true`
+   header.
+2. The dashboard renders a small "USD stale" pill on the affected widget.
+3. WoW + anomaly flags continue to compute from the cache; new recipients
+   are graded `pending` instead of `new`.
+4. Policy enforcement is **never** gated on GoldRush — spend continues to
+   flow even if insights briefly degrade.
+
+```ts
+import { getInsights } from '@rein/sdk';
+
+const insights = await getInsights({ vault });
+if (insights.stale) {
+  // optional: surface a banner to the owner
+}
+```
+
+## Reputation card in the policy editor
+
+Pasting a recipient pubkey into the allowlist hits
+`GET /v1/recipient/:pubkey/grade` and renders the graded card inline:
+
+```ts
+import { gradeRecipient } from '@rein/sdk';
+
+const card = await gradeRecipient(pubkey);
+// {
+//   grade: 'known',           // 'known' | 'new' | 'flagged'
+//   protocol: 'Phantom team',
+//   firstSeen: '2022-06-14',
+//   usdVolume30d: 4_300_000,
+//   topHolding: 'USDC',
+// }
+```
+
+Green = known protocol. Amber = new address. Red = flagged.
+
+## What's next
+
+- **Multi-currency insights** (EUR, GBP) — Q4 2026.
+- **Per-task cost breakdown** — Q4 2026, ties receipts to agent task IDs.

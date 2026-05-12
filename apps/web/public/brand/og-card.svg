@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="hsl(0, 0%, 100%)"/>
+  <!-- Soft dotted grid background -->
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="hsl(0, 0%, 90%)"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Mark, scaled up -->
+  <g transform="translate(96, 96) scale(8)" stroke="hsl(173, 80%, 36%)">
+    <path d="M16 4 C20 6, 21 10, 14 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M10 12 C3 14, 4 18, 8 20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M16 4 L8 4" stroke-width="2" stroke-linecap="round"/>
+    <path d="M16 20 L8 20" stroke-width="2" stroke-linecap="round"/>
+    <path d="M8 4 C4 6, 3 10, 12 12 C21 14, 20 18, 16 20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="96" y="396" fill="hsl(0, 0%, 9%)"
+        font-family="Geist, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+        font-weight="600"
+        font-size="120"
+        letter-spacing="-4.8">REIN</text>
+
+  <!-- Tagline -->
+  <text x="96" y="468" fill="hsl(0, 0%, 30%)"
+        font-family="Geist, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+        font-weight="400"
+        font-size="36"
+        letter-spacing="-0.36">Trust-gated wallet for AI agents.</text>
+
+  <!-- URL footer -->
+  <text x="96" y="558" fill="hsl(0, 0%, 56%)"
+        font-family="Geist Mono, ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-weight="400"
+        font-size="22">rein.so</text>
+</svg>

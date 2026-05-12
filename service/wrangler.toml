@@ -1,0 +1,93 @@
+# ─────────────────────────────────────────────────────────────────────────
+# REIN service Worker — fully namespaced under `rein-*` so it doesn't
+# collide with any other Workers / KV namespaces / secrets in your CF account.
+#
+# Resources this file owns (all REIN-prefixed):
+#   - Worker:    rein-service-dev / rein-service-devnet / rein-service-production
+#   - KV:        REIN_KV (per env; provision via
+#                `wrangler kv namespace create REIN_KV --env devnet`)
+#   - Secrets:   HMAC_SIGNING_KEY, HELIUS_API_KEY, DELEGATE_KEYPAIR_BASE58,
+#                GOLDRUSH_API_KEY
+#                (per Worker; not shared with your other CF projects)
+#                For local dev, secrets live in service/.dev.vars (gitignored).
+#                For deployed envs, run:
+#                  wrangler secret put GOLDRUSH_API_KEY --env devnet
+#
+# Deploy paths (each is a separate Worker on its own URL):
+#   wrangler deploy --env devnet      → rein-service-devnet.<account>.workers.dev
+#   wrangler deploy --env production  → rein-service-production.<account>.workers.dev
+# ─────────────────────────────────────────────────────────────────────────
+
+name = "rein-service-dev"
+main = "src/index.ts"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[vars]
+ENVIRONMENT = "dev"
+SOLANA_CLUSTER = "devnet"
+SOLANA_RPC_URL = "https://api.devnet.solana.com"
+PROGRAM_ID = "2QFW8Xg2mrbrLv6JzUdmnczA1G3RkksH8SKmfXxCuwNj"
+# Test USDC mint created by `program/scripts/seed-devnet.ts`. Update if you
+# re-seed; the frontend reads this via GET /v1/config.
+USDC_MINT = "5KdxeDZXVupi7FN7ipox7SV2P4Hqjn4HVUUcGS7f4xB6"
+
+# Local dev (`wrangler dev`) auto-spins miniflare KV under this binding even if
+# the id is a placeholder. For a real deploy, run
+#   wrangler kv namespace create REIN_KV --env devnet
+# and paste the returned id below.
+[[kv_namespaces]]
+binding = "REIN_KV"
+id = "00000000000000000000000000000000"
+preview_id = "00000000000000000000000000000000"
+
+# Durable Objects — one ActivityRoom per vault. Auto-spun by miniflare locally.
+[[durable_objects.bindings]]
+name = "ACTIVITY_ROOM"
+class_name = "ActivityRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ActivityRoom"]
+
+# ───── env: devnet (deployed Worker hitting Solana devnet) ─────
+[env.devnet]
+name = "rein-service-devnet"
+workers_dev = true
+
+[env.devnet.vars]
+ENVIRONMENT = "devnet"
+SOLANA_CLUSTER = "devnet"
+SOLANA_RPC_URL = "https://api.devnet.solana.com"
+PROGRAM_ID = "2QFW8Xg2mrbrLv6JzUdmnczA1G3RkksH8SKmfXxCuwNj"
+USDC_MINT = "5KdxeDZXVupi7FN7ipox7SV2P4Hqjn4HVUUcGS7f4xB6"
+
+[[env.devnet.kv_namespaces]]
+binding = "REIN_KV"
+id = "89178ac4d5624d4f807f92b7de59d4f2"
+preview_id = "89178ac4d5624d4f807f92b7de59d4f2"
+
+[[env.devnet.durable_objects.bindings]]
+name = "ACTIVITY_ROOM"
+class_name = "ActivityRoom"
+
+# ───── env: production (mainnet — gated until Phase 8 audit) ─────
+[env.production]
+name = "rein-service-production"
+workers_dev = true
+
+[env.production.vars]
+ENVIRONMENT = "production"
+SOLANA_CLUSTER = "mainnet-beta"
+SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
+PROGRAM_ID = "2QFW8Xg2mrbrLv6JzUdmnczA1G3RkksH8SKmfXxCuwNj"
+
+[[env.production.kv_namespaces]]
+binding = "REIN_KV"
+id = "REPLACE_AFTER_wrangler_kv_namespace_create_PROD"
+preview_id = "REPLACE_AFTER_wrangler_kv_namespace_create_PROD"
+
+[[env.production.durable_objects.bindings]]
+name = "ACTIVITY_ROOM"
+class_name = "ActivityRoom"

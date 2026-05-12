@@ -1,0 +1,74 @@
+---
+title: Python SDK
+description: Use REIN with CrewAI, LangGraph, AutoGen, and any Python agent framework.
+---
+
+## Install
+
+```bash
+pip install rein
+```
+
+## Basic usage
+
+```python
+from rein import ReinClient
+
+client = ReinClient(
+    vault_pubkey=os.environ["REIN_VAULT_PUBKEY"],
+    api_key=os.environ["REIN_API_KEY"],
+)
+
+# Check balance
+balance = await client.balance()
+print(f"Vault: ${balance.usdc_balance:.2f} USDC")
+
+# Make a spend
+receipt = await client.spend(
+    recipient="api.brave.com",
+    amount_usdc=0.02,
+    memo="Brave Search",
+)
+print(f"Receipt: {receipt.nonce}")
+```
+
+## CrewAI integration
+
+```python
+from crewai import Agent, Task, Crew
+from rein.crewai import ReinSpendTool
+
+rein_tool = ReinSpendTool(
+    vault_pubkey=os.environ["REIN_VAULT_PUBKEY"],
+    api_key=os.environ["REIN_API_KEY"],
+)
+
+researcher = Agent(
+    role="Research Analyst",
+    goal="Find and summarize information",
+    tools=[rein_tool],
+    verbose=True,
+)
+```
+
+## LangGraph integration
+
+```python
+from langgraph.prebuilt import create_react_agent
+from rein.langchain import ReinSpendTool
+
+tools = [ReinSpendTool.from_env()]
+agent = create_react_agent(model, tools)
+```
+
+## Policy violations
+
+```python
+from rein.exceptions import PolicyViolationError
+
+try:
+    receipt = await client.spend("vendor.com", 99.00)
+except PolicyViolationError as e:
+    print(e.reason)  # "daily_cap_usdc exceeded"
+    print(e.policy_version)  # 3
+```

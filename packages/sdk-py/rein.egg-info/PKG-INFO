@@ -1,0 +1,73 @@
+Metadata-Version: 2.4
+Name: rein
+Version: 0.1.0
+Summary: REIN — Python SDK. Trust-gated wallet for AI agents on Solana.
+Author: REIN
+License: MIT
+Keywords: solana,agent,x402,wallet,policy
+Classifier: Development Status :: 3 - Alpha
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: base58>=2.1.1
+Provides-Extra: chain
+Requires-Dist: solders>=0.20.0; extra == "chain"
+Provides-Extra: test
+Requires-Dist: pytest>=8.0; extra == "test"
+Requires-Dist: pytest-asyncio>=0.23; extra == "test"
+Requires-Dist: pytest-httpx>=0.30; extra == "test"
+
+# rein — Python SDK
+
+Trust-gated wallet for AI agents on Solana.
+
+```bash
+pip install rein
+```
+
+## Quickstart
+
+```python
+import asyncio
+from rein import Rein
+
+async def main():
+    rein = Rein(
+        vault="<base58 vault PDA>",
+        token="rein_devnet_<kid>.<payload>.<sig>",
+    )
+    bal = await rein.balance()
+    print(bal)
+
+    result = await rein.spend(url="https://api.example.com/x402", max_amount=50_000)
+    print(result)
+
+asyncio.run(main())
+```
+
+## Surface
+
+| Method | Returns |
+|---|---|
+| `Rein.balance()` | `{ usdc: int, sol: int, updated_at: datetime }` |
+| `Rein.spend(...)` | `SpendResult` |
+| `Rein.history(limit=50, before=None)` | `list[Receipt]` |
+| `Rein.receipt(id_or_nonce)` | `Receipt | None` |
+| `Rein.simulate(recipient, amount)` | `SimulationOutcome` |
+| `Rein.request_step_up(amount, recipient, ttl_secs=300)` | `StepUpResult` |
+
+## Parity
+
+The Python policy simulator is parity-tested against [`specs/features/F16-fixtures/policy-cases.json`](../../specs/features/F16-fixtures/policy-cases.json) — the same fixture set that gates the TypeScript SDK. Every case must produce the same outcome in both implementations.
+
+Run the parity gate:
+
+```bash
+cd packages/sdk-py
+pip install -e ".[test]"
+pytest tests/test_parity.py -v
+```

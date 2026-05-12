@@ -1,0 +1,52 @@
+---
+title: Introduction
+description: Trust-gated spending for AI agents — on-chain policies, drop-in MCP.
+---
+
+## What is REIN?
+
+REIN is an on-chain spending policy layer for AI agents. It sits between your agent and every payment it makes, enforcing limits you set and logging every transaction permanently on Solana.
+
+**The problem:** AI agents make autonomous payments — to APIs, to LLMs, to data providers. Nothing stops them from overspending, and nothing makes those payments auditable after the fact.
+
+**The solution:** A Solana program that acts as a smart vault. You deposit USDC, set a policy, and every spend is checked against that policy before it executes. On-chain. Immutable. Auditable by anyone.
+
+## Core concepts
+
+<CardGroup cols={2}>
+  <Card title="Vault" icon="vault" href="/concepts#vault">
+    A Solana PDA that holds your agent's USDC. Only the program can move funds, and only within policy bounds.
+  </Card>
+  <Card title="Policy" icon="shield-check" href="/concepts#policy">
+    Daily caps, per-tx limits, allowlists, step-up thresholds — stored on-chain and enforced atomically.
+  </Card>
+  <Card title="Spend receipt" icon="receipt" href="/concepts#receipt">
+    Every payment creates an on-chain receipt PDA. Immutable, disputable, exportable.
+  </Card>
+  <Card title="Step-up" icon="lock" href="/concepts#step-up">
+    Transactions above your threshold pause and require your approval before executing.
+  </Card>
+</CardGroup>
+
+## Why Solana?
+
+- **Sub-second finality** — policy checks happen inside the tx, not before it
+- **x402 native** — HTTP 402 payment required + Solana = seamless agent commerce
+- **$10M+ already flowing** — real volume on Solana agent rails today
+
+## Drop-in anywhere
+
+REIN ships as a suite of packages for every agent runtime:
+
+| Runtime | Package |
+|---------|---------|
+| Claude Code / Cursor | `@rein/mcp` |
+| LangChain | `@rein/langchain` |
+| OpenAI Functions | `@rein/openai` |
+| Vercel AI SDK | `@rein/ai` |
+| Python (CrewAI, AutoGen) | `pip install rein` |
+| TypeScript | `@rein/sdk` |
+
+<Note>
+  All runtimes share the same vault and policy. One set of rules, everywhere your agent runs.
+</Note>

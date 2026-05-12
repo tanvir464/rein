@@ -1,0 +1,96 @@
+---
+title: Claude Code
+description: Add REIN to Claude Code in one command via MCP.
+---
+
+## Overview
+
+REIN integrates with Claude Code via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). Once installed, Claude Code gains four new tools: `rein_spend`, `rein_balance`, `rein_history`, and `rein_request_step_up` — all policy-gated.
+
+## Install
+
+```bash
+npx @rein/cli init --runtime mcp
+```
+
+This command:
+1. Detects your Claude Code config directory (`~/.claude/`)
+2. Writes the REIN MCP server entry to `~/.claude/.mcp.json`
+3. Links your vault pubkey from `$REIN_VAULT_PUBKEY`
+
+Restart Claude Code to activate.
+
+## Manual config
+
+If you prefer to configure manually, add to `~/.claude/.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "rein": {
+      "command": "npx",
+      "args": ["-y", "@rein/mcp"],
+      "env": {
+        "REIN_VAULT_PUBKEY": "your-vault-pubkey",
+        "REIN_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+## Available tools
+
+### `rein_spend`
+
+Make a policy-gated payment from your vault.
+
+```
+rein_spend(recipient, amount_usdc, memo?)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `recipient` | string | Domain or address to pay |
+| `amount_usdc` | number | Amount in USDC |
+| `memo` | string? | Optional label for the receipt |
+
+**Returns:** receipt nonce, on-chain tx signature, timestamp.
+
+### `rein_balance`
+
+```
+rein_balance()
+```
+
+Returns current vault balance, 24h spend, and policy version.
+
+### `rein_history`
+
+```
+rein_history(limit?, offset?)
+```
+
+Returns paginated on-chain receipts.
+
+### `rein_request_step_up`
+
+```
+rein_request_step_up(amount_usdc, recipient)
+```
+
+Sends a step-up request for transactions above your threshold. Blocks until approved or expired (TTL: 5 minutes).
+
+## Policy enforcement
+
+All tools check policy **before** executing. If a spend would violate any rule, the tool returns a `PolicyViolationError` with a human-readable reason — Claude sees this and can explain it to you.
+
+```
+Error: PolicyViolationError
+  reason: "per_tx_cap_usdc exceeded: requested $12.00, cap is $5.00"
+  policy_version: 3
+```
+
+<Note>
+  Policy checks happen inside the Solana transaction. Even if someone bypasses the MCP layer, on-chain enforcement still blocks invalid spends.
+</Note>

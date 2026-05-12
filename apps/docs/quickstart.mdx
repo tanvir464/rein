@@ -1,0 +1,100 @@
+---
+title: Quickstart
+description: Go from zero to a policy-gated agent in under 90 seconds.
+---
+
+## 1. Install the CLI
+
+```bash
+npx @rein/cli init
+```
+
+The CLI auto-detects your runtime (Claude Code, Cursor, LangChain, etc.) and writes the integration config.
+
+<Accordion title="Manual install for specific runtimes">
+
+**Claude Code / Cursor (MCP)**
+```bash
+npx @rein/cli init --runtime mcp
+```
+
+**LangChain**
+```bash
+npm install @rein/langchain
+```
+
+**OpenAI Functions**
+```bash
+npm install @rein/openai
+```
+
+**Vercel AI SDK**
+```bash
+npm install @rein/ai
+```
+
+**Python**
+```bash
+pip install rein
+```
+
+</Accordion>
+
+## 2. Connect your wallet
+
+Visit [app.rein.so/onboarding](https://app.rein.so/onboarding) and connect Phantom, Backpack, or any Solana wallet. Embedded wallet via Privy is also supported for email-only flows.
+
+## 3. Fund your vault
+
+Deposit USDC into your agent vault. You can bridge from other chains or use the built-in onramp.
+
+```typescript
+import { ReinClient } from '@rein/sdk';
+
+const rein = new ReinClient({
+  vaultPubkey: process.env.REIN_VAULT_PUBKEY,
+  apiKey: process.env.REIN_API_KEY,
+});
+
+const balance = await rein.balance();
+console.log(`Vault balance: $${balance.usdc}`);
+```
+
+## 4. Set your policy
+
+```typescript
+await rein.policy.update({
+  daily_cap_usdc: 50.00,
+  per_tx_cap_usdc: 5.00,
+  step_up_threshold: 10.00,
+  allowlist: ['api.anthropic.com', 'api.brave.com'],
+  paused: false,
+});
+```
+
+Or use the visual policy editor at [app.rein.so/app/policy](https://app.rein.so/app/policy).
+
+## 5. Make your first spend
+
+```typescript
+const receipt = await rein.spend({
+  recipient: 'api.brave.com',
+  amount_usdc: 0.02,
+  memo: 'Brave Search query',
+});
+
+console.log(`Receipt: ${receipt.nonce} — on-chain ✓`);
+```
+
+Every spend returns an on-chain receipt. If a transaction violates your policy, it throws a typed `PolicyViolationError` before any funds move.
+
+## What's next?
+
+<CardGroup cols={2}>
+  <Card title="Claude Code integration" icon="robot" href="/integrations/claude-code">
+    Wire REIN into your Claude Code MCP config in one command.
+  </Card>
+  <Card title="Activity feed" icon="activity" href="https://app.rein.so/app/activity">
+    Watch every spend in real time with on-chain receipts.
+  </Card>
+</CardGroup>

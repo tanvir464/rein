@@ -1,0 +1,93 @@
+{
+  "name": "agent-buys-5-calls-with-stepup",
+  "description": "Per phase-3-runtimes.md §Cross-runtime parity: agent buys 5 calls from api.syraa.fun, hits step-up at #4, owner approves, all 5 succeed.",
+  "vault": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "calls": [
+    {
+      "tool": "balance",
+      "args": {},
+      "rein_method": "balance",
+      "rein_returns": { "usdc": "10000000", "sol": "1000000000", "updatedAt": "2026-05-03T00:00:00Z" }
+    },
+    {
+      "tool": "spend",
+      "args": { "url": "https://api.syraa.fun/q?n=1", "max_amount": "50000" },
+      "rein_method": "spend",
+      "rein_returns": {
+        "ok": true,
+        "receiptId": "Rcpt1Pda11111111111111111111111111111111111",
+        "signature": "Sig1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "amount": "50000",
+        "recipient": "Recv1111111111111111111111111111111111111111",
+        "content": { "answer": "first" },
+        "policyVersion": 7,
+        "confirmedAt": "2026-05-03T00:00:01Z"
+      }
+    },
+    {
+      "tool": "spend",
+      "args": { "url": "https://api.syraa.fun/q?n=2", "max_amount": "50000" },
+      "rein_method": "spend",
+      "rein_returns": {
+        "ok": true,
+        "receiptId": "Rcpt2Pda22222222222222222222222222222222222",
+        "signature": "Sig2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "amount": "48000",
+        "recipient": "Recv1111111111111111111111111111111111111111",
+        "content": { "answer": "second" },
+        "policyVersion": 7,
+        "confirmedAt": "2026-05-03T00:00:02Z"
+      }
+    },
+    {
+      "tool": "spend",
+      "args": { "url": "https://api.syraa.fun/q?n=4", "max_amount": "1500000" },
+      "rein_method": "spend",
+      "rein_returns": {
+        "ok": false,
+        "reason": "ErrStepUpRequired",
+        "stage": "simulate",
+        "suggestedStepUp": { "amount": "1200000", "threshold": "1000000" }
+      }
+    },
+    {
+      "tool": "request_step_up",
+      "args": { "amount": "1200000", "recipient": "Recv1111111111111111111111111111111111111111", "ttl_secs": 300, "reason": "premium tier query" },
+      "rein_method": "requestStepUp",
+      "rein_returns": {
+        "requestPda": "StepUpPda33333333333333333333333333333333333",
+        "expiresAt": "2026-05-03T00:05:00Z",
+        "signature": "Sig3xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "tool": "history",
+      "args": { "limit": 3 },
+      "rein_method": "history",
+      "rein_returns": [
+        {
+          "id": "Rcpt2Pda22222222222222222222222222222222222",
+          "signature": "Sig2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "vault": "VaultPda1111111111111111111111111111111111",
+          "amount": "48000",
+          "recipient": "Recv1111111111111111111111111111111111111111",
+          "ts": "2026-05-03T00:00:02Z",
+          "policyVersion": 7,
+          "nonce": "2",
+          "disputed": false
+        },
+        {
+          "id": "Rcpt1Pda11111111111111111111111111111111111",
+          "signature": "Sig1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "vault": "VaultPda1111111111111111111111111111111111",
+          "amount": "50000",
+          "recipient": "Recv1111111111111111111111111111111111111111",
+          "ts": "2026-05-03T00:00:01Z",
+          "policyVersion": 7,
+          "nonce": "1",
+          "disputed": false
+        }
+      ]
+    }
+  ]
+}

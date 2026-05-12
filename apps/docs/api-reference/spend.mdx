@@ -1,0 +1,68 @@
+---
+title: POST /v1/spend
+description: Execute a policy-gated USDC spend from a vault.
+---
+
+<ParamField body="vault_pubkey" type="string" required>
+  The vault's Solana public key.
+</ParamField>
+
+<ParamField body="recipient" type="string" required>
+  Recipient domain or Solana address.
+</ParamField>
+
+<ParamField body="amount_usdc" type="number" required>
+  Amount in USDC (max 6 decimal places).
+</ParamField>
+
+<ParamField body="memo" type="string">
+  Optional human-readable memo attached to the on-chain receipt.
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.rein.so/v1/spend \
+  -H "Authorization: Bearer $REIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vault_pubkey": "2QFW...wNj",
+    "recipient": "api.brave.com",
+    "amount_usdc": 0.02,
+    "memo": "Brave Search query"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 Success
+{
+  "receipt": {
+    "nonce": "7xK2...mR9",
+    "vault_pubkey": "2QFW...wNj",
+    "recipient": "api.brave.com",
+    "amount_usdc": 0.02,
+    "memo": "Brave Search query",
+    "policy_version": 3,
+    "tx_signature": "3vQW...aBc",
+    "timestamp": "2026-05-07T09:22:14.000Z"
+  }
+}
+```
+
+```json 402 Policy violation
+{
+  "error": "PolicyViolationError",
+  "reason": "per_tx_cap_usdc exceeded: requested $12.00, cap is $5.00",
+  "policy_version": 3
+}
+```
+
+```json 403 Step-up required
+{
+  "error": "StepUpRequired",
+  "step_up_id": "su_7xK2...mR9",
+  "threshold_usdc": 10.00,
+  "ttl_seconds": 300
+}
+```
+</ResponseExample>

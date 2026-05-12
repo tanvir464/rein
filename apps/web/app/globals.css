@@ -1,0 +1,194 @@
+@import 'tailwindcss';
+@import '../styles/tokens.css';
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent-700);
+  --color-accent-hover: var(--accent-900);
+  --color-accent-soft: var(--accent-100);
+  --color-accent-strong: var(--accent-900);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-900: var(--gray-900);
+  --color-gray-1000: var(--gray-1000);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--accent-300);
+  color: var(--accent-1000);
+}
+
+[data-theme='dark'] ::selection {
+  background: var(--accent-900);
+  color: var(--accent-100);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+button:disabled,
+button[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* hide scrollbar in horizontal-scroll affordances */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* dotted background grid (Vercel-style hero) */
+.dotted-bg {
+  background-image: radial-gradient(circle, var(--gray-300) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* keyframes */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  /* Subtle shimmer — the peak is only a few lightness points above the
+   * surrounding surface so the placeholder reads as "loading" without
+   * flashing. In dark mode, the original used --gray-900 (which is 86%
+   * lightness — basically white) for a 77-point jump; that's why it felt
+   * too bright. --gray-300 in dark mode is a quiet 20% lightness. */
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 0%,
+    var(--gray-100) 50%,
+    var(--bg-elevated) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+[data-theme='dark'] .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 0%,
+    var(--gray-300) 50%,
+    var(--bg-elevated) 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-in {
+  animation: fade-in var(--dur-base) var(--ease-glide);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0; }
+}
+
+/* nav responsive helpers */
+@media (max-width: 900px) {
+  .hidden-mobile { display: none !important; }
+  .show-mobile { display: flex !important; }
+}
+
+/* responsive grid helpers */
+@media (max-width: 768px) {
+  .bento-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+  }
+  .bento-grid > :first-child {
+    grid-row: auto !important;
+  }
+  .feature-row {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .feature-row > div {
+    order: unset !important;
+  }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 var(--accent-300); }
+  70% { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.pulse-ring {
+  animation: pulse-ring 1.6s var(--ease-glide) infinite;
+}
+
+.card-interactive {
+  transition:
+    transform var(--dur-base) var(--ease-spring),
+    border-color var(--dur-base) var(--ease-spring);
+  cursor: pointer;
+}
+.card-interactive:hover {
+  transform: translateY(-1px);
+  border-color: var(--gray-500);
+}

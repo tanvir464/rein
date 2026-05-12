@@ -1,0 +1,70 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "REIN",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#1a9e87",
+    "light": "#2ec9aa",
+    "dark": "#0d7060",
+    "anchors": {
+      "from": "#1a9e87",
+      "to": "#2ec9aa"
+    }
+  },
+  "topbarLinks": [
+    { "name": "Dashboard", "url": "https://app.rein.so/app" }
+  ],
+  "topbarCtaButton": {
+    "name": "Get started",
+    "url": "https://app.rein.so/onboarding"
+  },
+  "tabs": [
+    { "name": "API Reference", "url": "api-reference" }
+  ],
+  "anchors": [
+    { "name": "GitHub", "icon": "github", "url": "https://github.com/tanvir464/rein" },
+    { "name": "Discord", "icon": "discord", "url": "#" }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": ["introduction", "quickstart", "concepts"]
+    },
+    {
+      "group": "Concepts",
+      "pages": ["concepts/trust-model"]
+    },
+    {
+      "group": "SDK",
+      "pages": ["sdk/private-spend", "sdk/insights"]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "integrations/claude-code",
+        "integrations/cursor",
+        "integrations/langchain",
+        "integrations/openai",
+        "integrations/vercel-ai",
+        "integrations/python"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/spend",
+        "api-reference/balance",
+        "api-reference/policy",
+        "api-reference/receipts"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/tanvir464/rein",
+    "x": "https://x.com/reinprotocol"
+  }
+}

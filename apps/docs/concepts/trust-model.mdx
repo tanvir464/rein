@@ -1,0 +1,72 @@
+---
+title: 'Trust model'
+description: 'Four keys, one rule: the owner key never moves. How REIN keeps policy enforcement on-chain while keeping spend execution private.'
+---
+
+REIN keeps the owner's key off the hot path entirely. Policy is enforced
+on-chain. Private spend is brokered by an isolated sidecar. Auditors see only
+what the owner scopes to them.
+
+## The four keys
+
+| Key                          | Lives where                                                  | Signs what                                                                  |
+| ---------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| **Owner key**                | Phantom / Backpack / hardware wallet                         | Policy edits, dispute, refund, view-key derivation. **Never the private path.** |
+| **Agent key**                | Bound to a vault, scoped by Policy PDA                       | Public spend transactions. On-chain rules reject anything outside policy.   |
+| **Sidecar key (Fly.io)**     | Isolated service; Umbra UTXO broker. No DB, no logs.         | Shielded UTXO creation tx. Sees commitments — not amounts, not recipients.  |
+| **View key (browser-only)**  | Derived from a one-time owner signature; held in browser RAM | Nothing on-chain. Decrypts confidential receipts client-side.               |
+
+## What stays public
+
+- **Policy PDA** — every rule (daily cap, per-tx, allowlist, expiry, step-up
+  threshold) is readable on Solana and enforced atomically inside spend tx.
+- **Public spend path** — vanilla x402 receipts, amount + recipient visible.
+- **Disputes + refunds** — owner-signed actions, on-chain.
+
+## What goes private
+
+- **Amounts** — encrypted at-rest via the view key.
+- **Recipients** — committed-to on-chain; resolved only at decrypt time.
+- **Receipt graph** — confidential receipts are unlinkable on the public ledger.
+
+## What the sidecar can do
+
+The sidecar's authority is deliberately narrow. It cannot:
+
+- Edit policy.
+- Dispute or refund a receipt.
+- Decrypt receipts (it does not hold view keys).
+- Sign anything outside the Umbra UTXO program.
+
+It can only build and sign shielded-UTXO creation transactions for vaults
+that have explicitly opted in. If the sidecar is fully compromised, an
+attacker still cannot drain the vault — every spend remains gated by the
+Policy PDA enforced on-chain.
+
+## Disclosure: scoped, owner-driven
+
+The view key can be split into **scoped grants** — for example, "every
+receipt in Q2 2026, recipients matching prefix X." A grant is shareable as
+a single string. Auditors load it into the REIN observer view and see only
+the scoped slice. The owner key never moves and the underlying view key is
+never exposed.
+
+## Diagram
+
+See the side-tracks architecture diagram in
+`specs/sidetracks-architecture.md` for the full request flow:
+
+```
+owner wallet ──signs once──▶ view key (browser)
+                                     │
+                                     ▼
+                              decrypt receipts
+                                     ▲
+                                     │ encrypted blobs
+                                     │
+agent ──spend──▶ REIN service ──▶ sidecar ──▶ Umbra (Arcium) ──▶ Solana
+                       │                                            │
+                       └────── Policy PDA + dispute/refund ─────────┘
+                                     ▲
+                              owner wallet (only path)
+```
